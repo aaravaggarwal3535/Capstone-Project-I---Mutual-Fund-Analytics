@@ -83,3 +83,59 @@ Execution: Utilized a Pandas Left Merge (pd.merge(..., how='left')) to cross-ref
 ```
 Remote repository updated with message: 'Day 1: Data ingestion complete'.
 ```
+
+## Day 2: Data Cleaning + SQL Database Design
+
+### Step 1: Data Cleaning (All 10 Datasets)
+```text
+Script: data_cleaning.py
+
+Execution: 
+- Performed a general cleaning pass across all datasets to drop duplicates and strip hidden whitespace.
+- Applied specific, strict business logic to the core datasets:
+  - nav_history: Parsed dates to datetime, sorted by amfi_code and date, forward-filled missing NAVs, and validated NAV > 0.
+  - investor_transactions: Standardized transaction types (Sip/Lumpsum/Redemption), validated amounts > 0, and handled missing KYC statuses.
+  - scheme_performance: Ensured returns were numeric, validated expense ratio ranges (0.1% - 2.5%), and created a boolean flag for negative Sharpe ratios.
+```
+
+### Step 2: Design SQLite Schema
+```
+File: sql/schema.sql
+
+Execution: Designed a relational database structure matching the exact cleaned CSV columns. Defined Primary Keys, Foreign Keys (linked via amfi_code), and strict data types for 4 core tables:
+- dim_fund (Dimension table for fund details)
+- fact_nav (Fact table for historical NAVs)
+- fact_transactions (Fact table for investor activity)
+- fact_performance (Fact table for scheme metrics)
+```
+
+### Step 3: Load Cleaned Data into Database
+```
+Script: db_loader.py
+
+Execution: Utilized SQLAlchemy to connect to an SQLite database (bluestock_mf.db). Executed the schema.sql file first to enforce strict table structures, then ingested the processed CSVs using Pandas `.to_sql()` with `if_exists='append'` to maintain data integrity.
+```
+
+### Step 4: Write Analytical SQL Queries
+```
+File: sql/queries.sql
+
+Execution: Wrote 10 industry-standard analytical queries, including:
+- Top 5 funds by total transaction amount (proxy for AUM).
+- Average NAV per month for specific funds.
+- Total SIP inflows year-over-year.
+- Transaction volume grouped by state demographics.
+- Identifying funds with expense ratios < 1% and flagging those with negative Sharpe ratios.
+```
+
+### Step 5: Data Dictionary Creation
+```
+File: reports/data_dictionary.md
+
+Execution: Documented all columns, data types, and data sources for the newly created SQLite database to ensure clear technical hand-offs.
+```
+
+### Step 6: Version Control & Finalization
+```
+Remote repository updated with message: 'Day 2: Cleaned data + SQLite DB loaded'.
+```
