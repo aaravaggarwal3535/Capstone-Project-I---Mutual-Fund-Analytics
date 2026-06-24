@@ -4,7 +4,7 @@ from sqlalchemy import create_engine
 import os
 
 PROCESSED_DIR = "./data/processed"
-DB_PATH = "sqlite:///./sql/bluestock_mf.db"
+DB_PATH = "sqlite:///./db/bluestock_mf.db"
 SCHEMA_PATH = "./sql/schema.sql"
 
 def load_database(processed_dir, db_path, schema_path):

@@ -139,3 +139,37 @@ Execution: Documented all columns, data types, and data sources for the newly cr
 ```
 Remote repository updated with message: 'Day 2: Cleaned data + SQLite DB loaded'.
 ```
+
+## Day 3: Exploratory Data Analysis (EDA)
+
+### Step 1: Market Trends & AUM Analysis
+```text
+Notebook: notebooks/03_eda_analysis.ipynb
+
+Execution: 
+- Plotted interactive daily NAV trend lines (2022–2026) using Plotly, highlighting the 2023 rally and 2024 corrections.
+- Generated a grouped bar chart in Seaborn showcasing AUM growth by fund house, specifically highlighting SBI's dominance at the ~Rs. 12.5L Crore mark.
+```
+
+### Step 2: Inflow & Demographic Behavior
+```
+Execution:
+- Visualized monthly SIP inflows using Plotly, marking the historic Rs. 31,002 Cr milestone.
+- Created a Seaborn heatmap to track net inflows across various mutual fund categories over time.
+- Analyzed investor demographics by building age group distribution pie charts and SIP amount box plots (log scale) to identify outlier spending behaviors.
+- Mapped geographic distributions comparing T30 (Top 30) vs B30 cities to measure retail penetration.
+```
+
+### Step 3: Industry Growth & Portfolio Metrics
+```
+Execution:
+- Tracked industry folio count growth from 13.26 Cr to 26.12 Cr using Plotly line charts.
+- Computed and visualized a pairwise correlation matrix of daily NAV returns for the Top 10 AUM funds to assess diversification potential.
+- Built a donut chart detailing the top sector allocations (Banking & IT) across equity portfolios.
+```
+
+### Step 4: Insights & Documentation
+```
+Execution: Summarized 10 key data-driven findings into the final Jupyter Markdown cell, detailing market resilience, retail confidence, and portfolio concentration. All 9 charts were successfully exported as high-resolution PNGs to the `reports/charts/` directory.
+```
+
