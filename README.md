@@ -173,3 +173,34 @@ Execution:
 Execution: Summarized 10 key data-driven findings into the final Jupyter Markdown cell, detailing market resilience, retail confidence, and portfolio concentration. All 9 charts were successfully exported as high-resolution PNGs to the `reports/charts/` directory.
 ```
 
+## Day 4: Fund Performance Analytics
+
+### Step 1: Core Performance Metrics Calculation
+```text
+Notebook: notebooks/04_performance_analytics.ipynb
+
+Execution: 
+- Computed daily arithmetic returns for all 40 schemes and transformed them into annualized figures.
+- Calculated exact 1-year, 3-year, and 5-year Compound Annual Growth Rates (CAGR) dynamically using date offsets from the latest available NAV.
+```
+
+### Step 2: Risk-Adjusted Modeling
+```
+Execution:
+- Computed the Sharpe Ratio assuming a risk-free rate of 6.5% (RBI proxy).
+- Calculated the Sortino Ratio by isolating downside standard deviation using only negative return days.
+- Derived Alpha and Beta by executing an Ordinary Least Squares (OLS) linear regression of fund daily returns against the Nifty 100 benchmark.
+- Calculated Maximum Drawdown over the dataset lifespan, flagging the exact dates of peak-to-trough drops.
+```
+
+### Step 3: Composite Fund Scorecard Design
+```
+Execution: Designed a weighted scoring model (0-100 scale) to programmatically identify the best funds. 
+- Algorithm: 30% (3Y CAGR) + 25% (Sharpe) + 20% (Alpha) + 15% (Inverse Expense Ratio) + 10% (Max Drawdown).
+- Output: Generated `fund_scorecard.csv` to serve as the backend logic for the final recommendation engine.
+```
+
+### Step 4: Benchmark Comparison
+```
+Execution: Mapped the cumulative returns of the Top 5 scored funds against the Nifty 50 and Nifty 100 indices over a 3-year period. Extracted and documented the annualized Tracking Error for each top fund against the Nifty 100 to assess index deviation.
+```
