@@ -204,3 +204,19 @@ Execution: Designed a weighted scoring model (0-100 scale) to programmatically i
 ```
 Execution: Mapped the cumulative returns of the Top 5 scored funds against the Nifty 50 and Nifty 100 indices over a 3-year period. Extracted and documented the annualized Tracking Error for each top fund against the Nifty 100 to assess index deviation.
 ```
+
+## Day 5: Dashboard Development (Power BI)
+
+### Overview
+Successfully built a highly interactive, 4-page Power BI dashboard connected directly to the processed data models. Established a robust Star Schema linking the `dim_fund` master dimension table to multiple fact and aggregate tables to enable cross-filtering and deep-dive analytics.
+
+### Dashboard Architecture
+1. **Industry Overview:** Executive KPI tracking for Total AUM (~Rs. 81L Cr), active folios (26.12 Cr), and SIP Inflows, supported by a Top 10 AMC concentration bar chart.
+2. **Fund Performance:** Engineered an interactive Risk (Standard Deviation) vs. Return (3-Year CAGR) scatter plot, integrated with a dynamically sortable quantitative scorecard matrix. 
+3. **Investor Analytics:** Visualized geographic SIP distribution across states and analyzed demographic payment behaviors, highlighting average SIP values across distinct age groups.
+4. **SIP & Market Trends:** Designed dual-axis trendlines and a conditional-formatted matrix heatmap to track categorical capital rotation and retail momentum against market indices.
+
+### Deliverables Generated
+- `bluestock_mf_dashboard.pbix` (Interactive Power BI Source File)
+- `Dashboard.pdf` (Static Executive Export)
+- High-resolution dashboard page screenshots (`reports/` folder)
