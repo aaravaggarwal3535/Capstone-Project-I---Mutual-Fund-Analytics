@@ -220,3 +220,43 @@ Successfully built a highly interactive, 4-page Power BI dashboard connected dir
 - `bluestock_mf_dashboard.pbix` (Interactive Power BI Source File)
 - `Dashboard.pdf` (Static Executive Export)
 - High-resolution dashboard page screenshots (`reports/` folder)
+
+
+## Day 6: Advanced Analytics & Risk Metrics
+
+### Task-by-Task Execution Breakdown
+
+**Task 1: Value at Risk (VaR) & Conditional VaR (CVaR) Modeling**
+*   **What we did:** Measured extreme downside tail-risk for every fund to understand worst-case scenario daily losses.
+*   **How we did it:** Grouped the `fact_nav` table by fund and used `numpy.percentile` to find the 5th percentile of the daily return distribution (95% VaR). We then calculated CVaR by taking the statistical mean of all returns that fell below that VaR threshold.
+*   **Output:** `var_cvar_report.csv`
+
+**Task 2: Rolling 90-Day Sharpe Ratio Analysis**
+*   **What we did:** Tracked how risk-adjusted returns fluctuate over time, rather than relying on a static multi-year average.
+*   **How we did it:** Applied Pandas `.rolling(window=90)` to the daily returns of the top 5 funds to calculate dynamic moving averages and standard deviations. We annualized the results and visualized the cyclicality using Matplotlib.
+*   **Output:** `rolling_sharpe_chart.png`
+
+**Task 3: Investor Cohort Analysis**
+*   **What we did:** Profiled investor behavior and capital commitment based on the year they made their first transaction.
+*   **How we did it:** Used Pandas `groupby` to isolate the minimum transaction date per `investor_id` to establish their cohort year (2024 vs. 2025). We then aggregated the total capital invested, average SIP ticket size, and preferred fund for each cohort.
+*   **Output:** `cohort_analysis.csv`
+
+**Task 4: SIP Continuation & At-Risk Flagging**
+*   **What we did:** Built an early-warning system to identify investors who are likely pausing or canceling their recurring investments.
+*   **How we did it:** Filtered the transactions table for users with 6+ SIPs. We used Pandas `shift(1)` to calculate the exact `dt.days` gap between consecutive payments. Investors averaging a gap greater than 35 days were tagged with an `at_risk_flag`.
+*   **Output:** `sip_continuity.csv`
+
+**Task 5: Fund Recommendation Engine**
+*   **What we did:** Engineered a simple, terminal-based recommendation script that outputs top funds tailored to a user's risk appetite.
+*   **How we did it:** Created a standalone Python script (`recommender.py`) that connects directly to the SQLite database. It dynamically assigns a 'Low', 'Moderate', or 'High' risk grade based on a fund's standard deviation, filters by the user's input, and ranks the top 3 matches using the Sharpe Ratio.
+*   **Output:** `recommender.py` (Script)
+
+**Task 6: Sector Concentration Analysis (HHI)**
+*   **What we did:** Measured portfolio diversification to flag funds taking heavily concentrated bets on specific sectors.
+*   **How we did it:** Calculated the Herfindahl-Hirschman Index (HHI) for each equity fund by squaring the percentage weight of each sector holding (`weight_pct ^ 2`) and summing them. Funds scoring over 1,500–2,000 were flagged and visualized on a horizontal bar chart.
+*   **Output:** `sector_hhi.csv` and `sector_hhi_chart.png`
+
+**Task 7: Advanced Analytics Summary**
+*   **What we did:** Synthesized the raw mathematical outputs into actionable business insights.
+*   **How we did it:** Authored a Jupyter Markdown cell documenting 5 critical findings, including the severe CVaR of small-cap funds, the 97.8% SIP at-risk rate, and the higher average ticket size of newer investor cohorts.
+*   **Output:** Appended to `06_advanced_analytics.ipynb`
