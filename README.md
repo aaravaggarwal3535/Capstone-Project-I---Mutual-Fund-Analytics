@@ -42,11 +42,9 @@ C:\internships\
 ```
 
 ## Setup & Installation
-```
 1. Prerequisites
   Python 3.8 or higher, Power BI Desktop (for viewing the dashboard), Git
 2. Local Setup
-```
 ```bash
 $ git clone https://github.com/aaravaggarwal3535/Capstone-Project-I---Mutual-Fund-Analytics.git
 $ cd Capstone-Project-I---Mutual-Fund-Analytics
@@ -60,15 +58,11 @@ python -m venv .venv
 python3 -m venv .venv
 source .venv/bin/activate
 ```
-```
 3. Installing libraries
-```
 ```bash
 pip install -r requirements.txt
 ```
-```
 4. Run pipeline file
-```
 ```bash
 python run_pipeline.py
 ```
