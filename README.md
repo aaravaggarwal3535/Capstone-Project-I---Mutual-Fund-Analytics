@@ -1,4 +1,86 @@
-# Mutual Fund Analytics Capstone
+# 📈 Bluestock Mutual Fund Analytics: End-to-End Data Engineering & BI Pipeline
+
+![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)
+![SQLite](https://img.shields.io/badge/SQLite-Star_Schema-green.svg)
+![Power BI](https://img.shields.io/badge/Power_BI-Dashboard-yellow.svg)
+![Pandas](https://img.shields.io/badge/Pandas-Data_Processing-lightgrey.svg)
+
+## 📌 Project Overview
+The Indian Mutual Fund industry manages over ₹81 Lakh Crores in AUM, yet retail investors struggle with fragmented raw data and a lack of transparent, institutional-grade risk metrics. 
+
+This Capstone project solves this by building an automated, end-to-end data pipeline. It extracts raw AMFI datasets, cleans and transforms the data, and loads it into a high-performance **SQLite Star Schema**. Finally, it powers an interactive **Power BI Dashboard** to deliver actionable insights, risk-adjusted performance metrics (VaR, CVaR, Sharpe), and dynamic investment recommendations.
+
+---
+
+## 🛠️ Tech Stack & Architecture
+*   **Language:** Python (Pandas, NumPy, Logging, Subprocess)
+*   **Database:** SQLite3 (Dimensional Modeling / Star Schema)
+*   **Business Intelligence:** Power BI (DAX, Interactive Data Visualization)
+*   **Analytics:** Jupyter Notebooks (EDA, Tail Risk Modeling)
+
+### ⚙️ Pipeline Architecture
+1.  **Data Ingestion (`data_ingestion.py`):** Fetches and validates raw CSV data from the `/data/raw` directory.
+2.  **Data Transformation (`data_cleaning.py`):** Normalizes formats, handles missing values, casts correct data types, and standardizes AMC names.
+3.  **Database Loading (`db_loader.py` & `load_extra_tables.py`):** Inserts processed data into a Star Schema with a central `dim_fund` table linked to `fact_nav`, `fact_transactions`, and `fact_performance`.
+4.  **Analytics Engine (`recommended.py`):** Calculates risk scores and generates investment recommendations based on annualized standard deviation and rolling Sharpe ratios.
+5.  **Visualization (`Dashboard`):** Pre-aggregated materialized views feed directly into Power BI for zero-latency rendering.
+
+---
+
+## 📂 Repository Structure
+```text
+C:\internships\
+├── dashboard/          # Power BI project file (.pbix)
+├── data/               # Raw source CSVs and clean processed outputs
+├── db/                 # SQLite database file (bluestock_mf.db)
+├── notebooks/          # Exploratory Data Analysis (EDA) and Modeling
+├── reports/            # Presentation slides, charts, and Final PDF Report
+├── scripts/            # Core ETL pipeline scripts
+├── sql/                # SQL schema definitions and query templates
+├── run_pipeline.py     # Master orchestrator script
+└── requirements.txt    # Python dependencies
+```
+
+## Setup & Installation
+```
+1. Prerequisites
+  Python 3.8 or higher, Power BI Desktop (for viewing the dashboard), Git
+2. Local Setup
+```
+```bash
+$ git clone https://github.com/aaravaggarwal3535/Capstone-Project-I---Mutual-Fund-Analytics.git
+$ cd Capstone-Project-I---Mutual-Fund-Analytics
+```
+```bash
+# Windows
+python -m venv .venv
+.venv\Scripts\activate
+
+# macOS/Linux
+python3 -m venv .venv
+source .venv/bin/activate
+```
+```
+3. Installing libraries
+```
+```bash
+pip install -r requirements.txt
+```
+```
+4. Run pipeline file
+```
+```bash
+python run_pipeline.py
+```
+
+## To Open The Dashboard
+```
+Opening the Power BI Dashboard
+1. Install Power BI Desktop.
+2. Navigate to the dashboard/ folder in this repository.
+3. Open bluestock_mf_dashboard.pbix.
+4. The dashboard is pre-configured to connect to the local SQLite database. Simply click "Refresh" on the Power BI ribbon to pull the latest pipeline data.
+```
 
 ## Day 1: Project Setup + Data Ingestion (ETL)
 
@@ -260,3 +342,8 @@ Successfully built a highly interactive, 4-page Power BI dashboard connected dir
 *   **What we did:** Synthesized the raw mathematical outputs into actionable business insights.
 *   **How we did it:** Authored a Jupyter Markdown cell documenting 5 critical findings, including the severe CVaR of small-cap funds, the 97.8% SIP at-risk rate, and the higher average ticket size of newer investor cohorts.
 *   **Output:** Appended to `06_advanced_analytics.ipynb`
+
+# By Aarav Aggarwal
+## LinkedIn: https://www.linkedin.com/in/aarav-aggarwal35/
+## Portfolio: aaravaggarwal.vercel.app
+## Email: aaravaggarwal3535@gmail.com
