@@ -1,7 +1,13 @@
+"""
+Module: live_nav_fetch.py
+Purpose: Fetch live NAV data for specified mutual fund schemes and save it as CSV files.
+"""
 import requests
 import pandas as pd
-import json
 import os
+import logging
+
+logging.basicConfig(level=logging.INFO)
 
 FILE_SAVE_PATH = "../data/raw"
 
@@ -26,11 +32,11 @@ def fetch_save_nav(save_path, schemes):
                 csv_file_name = f"{nav_name}_{nav_id}_nav_his.csv"
                 csv_file_save_path = os.path.join(save_path, csv_file_name)
                 df.to_csv(csv_file_save_path, index=False)
-                print(f"Saved NAV data for {nav_name} to {csv_file_save_path}")
+                logging.info(f"Saved NAV data for {nav_name} to {csv_file_save_path}")
             else:
-                print(f"No NAV data found for {nav_name} id {nav_id} link {url}.")
+                logging.info(f"No NAV data found for {nav_name} id {nav_id} link {url}.")
         else:
-            print(f"Failed to fetch data for {nav_name}. Status code: {response.status_code}")
+            logging.info(f"Failed to fetch data for {nav_name}. Status code: {response.status_code}")
 
 if __name__ == "__main__":
     fetch_save_nav(FILE_SAVE_PATH, schemes)

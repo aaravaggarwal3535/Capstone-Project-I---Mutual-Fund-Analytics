@@ -1,8 +1,15 @@
-# scripts/load_extra_tables.py
+"""
+Module: load_extra_tables.py
+Purpose: Load additional tables into the SQLite database.
+"""
+
 import pandas as pd
 from sqlalchemy import create_engine
 import os
 import sqlite3
+import logging
+
+logging.basicConfig(level=logging.INFO)
 
 # Set up paths
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
@@ -12,7 +19,8 @@ SCHEMA_PATH = os.path.join(BASE_DIR, 'sql', 'schema_extra.sql')
 ENGINE = create_engine(f"sqlite:///{DB_PATH}")
 
 def setup_and_load():
-    print("1. Executing Strict SQL Schema...")
+    """Set up the database schema and load additional tables from CSV files."""
+    logging.info("1. Executing Strict SQL Schema...")
     # Read and execute the schema_extra.sql file
     with open(SCHEMA_PATH, 'r') as file:
         schema_script = file.read()
@@ -28,7 +36,7 @@ def setup_and_load():
         "clean_industry_folio_count.csv": "industry_folio_count"
     }
     
-    print("\n2. Appending data to pre-defined tables...")
+    logging.info("\n2. Appending data to pre-defined tables...")
     for file_name, table_name in table_mappings.items():
         file_path = os.path.join(PROCESSED_DIR, file_name)
         
@@ -43,13 +51,13 @@ def setup_and_load():
                 
                 # Append data cleanly into our strict schema
                 df.to_sql(table_name, ENGINE, if_exists='append', index=False)
-                print(f"'{file_name}' loaded smoothly into '{table_name}'")
+                logging.info(f"'{file_name}' loaded smoothly into '{table_name}'")
             except Exception as e:
-                print(f"Error loading '{file_name}': {e}")
+                logging.info(f"Error loading '{file_name}': {e}")
         else:
-            print(f"Warning: '{file_name}' not found.")
+            logging.info(f"Warning: '{file_name}' not found.")
 
-    print("\nOperation Complete! The database is now structurally flawless for Power BI.")
+    logging.info("\nOperation Complete! The database is now structurally flawless for Power BI.")
 
 if __name__ == "__main__":
     setup_and_load()
