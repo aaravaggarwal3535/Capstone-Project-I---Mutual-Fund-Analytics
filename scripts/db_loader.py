@@ -15,39 +15,37 @@ DB_PATH = "sqlite:///db/bluestock_mf.db"
 SCHEMA_PATH = "sql/schema.sql"
 
 def load_database(processed_dir, db_path, schema_path):
-    """Load processed CSV files into a SQLite database.
-    Args:
-        processed_dir (str): Path to the directory containing processed CSV files.
-        db_path (str): Path to the SQLite database.
-        schema_path (str): Path to the SQL schema file.
-    """
+    """Load processed CSV files into a SQLite database."""
 
     engine = create_engine(db_path, echo=False)
-    logging.info("Executing schema.sql to build tables")
+    
+    # 1. Initialize schema
+    logging.info("Executing schema.sql to build/reset table structures")
     with engine.connect() as conn:
         raw_conn = conn.connection
         with open(schema_path, "r") as f:
             raw_conn.executescript(f.read())
-    logging.info("Tables created successfully")
-    # Load dim_fund
-    logging.info("Loading dim_fund")
-    df_fund = pd.read_csv(os.path.join(processed_dir, "clean_fund.csv"))
-    df_fund.to_sql('dim_fund', engine, if_exists='append', index=False)
+    logging.info("Schema applied successfully")
 
-    # Load fact_nav
-    logging.info("Loading fact_nav")
-    df_nav = pd.read_csv(os.path.join(processed_dir, "clean_nav.csv"))
-    df_nav.to_sql('fact_nav', engine, if_exists='append', index=False)
+    # 2. Define your table mappings (Filename : Table Name)
+    table_map = {
+        "clean_fund.csv": "dim_fund",
+        "clean_nav.csv": "fact_nav",
+        "clean_transactions.csv": "fact_transactions",
+        "clean_performance.csv": "fact_performance"
+    }
 
-    # Load fact_transactions
-    logging.info("Loading fact_transactions")
-    df_trans = pd.read_csv(os.path.join(processed_dir, "clean_transactions.csv"))
-    df_trans.to_sql('fact_transactions', engine, if_exists='append', index=False)
+    # 3. Load files using 'replace' to ensure fresh data
+    for filename, table_name in table_map.items():
+        file_path = os.path.join(processed_dir, filename)
+        if os.path.exists(file_path):
+            logging.info(f"Loading {filename} into {table_name}")
+            df = pd.read_csv(file_path)
+            # 'replace' drops the old table and writes the fresh CSV, 
+            # ensuring Primary Key constraints are not violated.
+            df.to_sql(table_name, engine, if_exists='replace', index=False)
+        else:
+            logging.warning(f"File not found: {file_path}")
 
-    # Load fact_performance
-    logging.info("Loading fact_performance")
-    df_perf = pd.read_csv(os.path.join(processed_dir, "clean_performance.csv"))
-    df_perf.to_sql('fact_performance', engine, if_exists='append', index=False)
-    
 if __name__ == "__main__":
     load_database(PROCESSED_DIR, DB_PATH, SCHEMA_PATH)
