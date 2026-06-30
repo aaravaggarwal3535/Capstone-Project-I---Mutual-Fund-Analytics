@@ -9,7 +9,7 @@ import logging
 
 logging.basicConfig(level=logging.INFO)
 
-FILE_SAVE_PATH = "../data/raw"
+FILE_SAVE_PATH = "data/raw"
 
 schemes = {
     "SBI_Bluechip": "119551",
@@ -21,6 +21,10 @@ schemes = {
 
 def fetch_save_nav(save_path, schemes):
     """function to fetch the data from the url then convert it to dataframe then save it as csv"""
+    
+    # Force the server to create the data/raw folder if it doesn't exist
+    os.makedirs(save_path, exist_ok=True)
+    
     for nav_name, nav_id in schemes.items():
         url = f"https://api.mfapi.in/mf/{nav_id}"
         response = requests.get(url)
