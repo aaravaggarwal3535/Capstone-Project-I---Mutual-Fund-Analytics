@@ -1,7 +1,7 @@
 -- sql/schema.sql
 
 -- 1. Dimension Table: Fund Master
-CREATE TABLE dim_fund (
+CREATE TABLE IF NOT EXISTS dim_fund (
     amfi_code INTEGER PRIMARY KEY,
     fund_house TEXT,
     scheme_name TEXT,
@@ -20,7 +20,7 @@ CREATE TABLE dim_fund (
 );
 
 -- 2. Fact Table: NAV History
-CREATE TABLE fact_nav (
+CREATE TABLE IF NOT EXISTS fact_nav (
     amfi_code INTEGER,
     date DATE,
     nav REAL,
@@ -29,7 +29,7 @@ CREATE TABLE fact_nav (
 
 -- 3. Fact Table: Investor Transactions
 -- Note: There is no transaction_id in the CSV, so we don't define a Primary Key here.
-CREATE TABLE fact_transactions (
+CREATE TABLE IF NOT EXISTS fact_transactions (
     investor_id TEXT,
     transaction_date DATE,
     amfi_code INTEGER,
@@ -47,7 +47,7 @@ CREATE TABLE fact_transactions (
 );
 
 -- 4. Fact Table: Scheme Performance
-CREATE TABLE fact_performance (
+CREATE TABLE IF NOT EXISTS fact_performance (
     amfi_code INTEGER PRIMARY KEY,
     scheme_name TEXT,
     fund_house TEXT,
