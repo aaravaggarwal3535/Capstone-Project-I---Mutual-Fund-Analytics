@@ -9,7 +9,7 @@ import logging
 
 logging.basicConfig(level=logging.INFO)
 
-path = "../data/raw"
+path = "data/raw"
 def ingestion_data(path):
     """function to fetch the name of all the available csv file in a particular path and
       then print the shape/dtypes/head of the following csv"""

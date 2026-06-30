@@ -10,9 +10,9 @@ import logging
 
 logging.basicConfig(level=logging.INFO)
 
-PROCESSED_DIR = "../data/processed"
-DB_PATH = "sqlite:///../db/bluestock_mf.db"
-SCHEMA_PATH = "../sql/schema.sql"
+PROCESSED_DIR = "data/processed"
+DB_PATH = "sqlite:///db/bluestock_mf.db"
+SCHEMA_PATH = "sql/schema.sql"
 
 def load_database(processed_dir, db_path, schema_path):
     """Load processed CSV files into a SQLite database.

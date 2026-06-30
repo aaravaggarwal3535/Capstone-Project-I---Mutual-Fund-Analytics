@@ -10,8 +10,8 @@ import logging
 
 logging.basicConfig(level=logging.INFO)
 
-RAW_DATA_DIR = "../data/raw"
-SAVE_DATA_DIR = "../data/processed"
+RAW_DATA_DIR = "data/raw"
+SAVE_DATA_DIR = "data/processed"
 
 def clean_data(file_path, save_path):
     """
