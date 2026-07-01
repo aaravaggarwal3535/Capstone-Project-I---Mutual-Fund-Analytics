@@ -20,11 +20,12 @@ jobs:
         
     - name: Install Runtime Dependencies
       run: |
-        pip install pandas sqlalchemy
+        pip install pandas sqlalchemy psycopg2-binary
         
     - name: Execute Automated Email Report Generator
       env:
-        # Maps secure secrets into execution environment flags safely
+        # Maps secure repository secrets into execution environment variables safely
         EMAIL_USER: ${{ secrets.EMAIL_USER }}
         EMAIL_PASS: ${{ secrets.EMAIL_PASS }}
+        SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
       run: python scripts/email_report.py

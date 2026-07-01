@@ -1,4 +1,4 @@
-# 📈 Bluestock Mutual Fund Analytics: End-to-End Data Engineering & BI Pipeline
+# Bluestock Mutual Fund Analytics: End-to-End Data Engineering & BI Pipeline
 
 ![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)
 ![SQLite](https://img.shields.io/badge/SQLite-Star_Schema-green.svg)

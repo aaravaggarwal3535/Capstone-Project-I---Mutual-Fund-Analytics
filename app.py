@@ -3,6 +3,7 @@ import sqlite3
 import pandas as pd
 import plotly.express as px
 import re
+from sqlalchemy import text
 
 # --- PAGE CONFIGURATION ---
 st.set_page_config(page_title="Bluestock MF Analytics Dashboard", page_icon="📈", layout="wide")
@@ -209,35 +210,39 @@ st.sidebar.markdown("---")
 st.sidebar.subheader("📬 Subscribe to Weekly Reports")
 st.sidebar.caption("Get a weekly HTML summary of top-performing mutual funds delivered to your inbox.")
 
-# Email Input Field
 user_email = st.sidebar.text_input("Email Address", placeholder="you@example.com")
 
 if st.sidebar.button("Subscribe"):
-    # Validate email format using regex
     if re.match(r"[^@]+@[^@]+\.[^@]+", user_email):
         try:
-            # Connect to local SQLite DB
-            conn = sqlite3.connect("db/bluestock_mf.db")
-            cursor = conn.cursor()
+            # Connect to the Supabase Cloud DB
+            conn = st.connection("supabase", type="sql")
             
-            # Ensure the subscribers table exists
-            cursor.execute("""
-                CREATE TABLE IF NOT EXISTS subscribers (
-                    email TEXT PRIMARY KEY,
-                    subscribed_on DATE DEFAULT CURRENT_DATE
-                )
-            """)
-            
-            # Insert the email address safely
-            cursor.execute("INSERT INTO subscribers (email) VALUES (?)", (user_email,))
-            conn.commit()
-            conn.close()
-            
-            st.sidebar.success("Successfully subscribed!")
-            st.balloons()
-            
-        except sqlite3.IntegrityError:
-            st.sidebar.warning("This email is already subscribed!")
+            with conn.session as s:
+                # Create the table if it doesn't exist in the cloud
+                s.execute(text("""
+                    CREATE TABLE IF NOT EXISTS subscribers (
+                        email TEXT PRIMARY KEY,
+                        subscribed_on DATE DEFAULT CURRENT_DATE
+                    )
+                """))
+                
+                # Check if the email is already in the database
+                existing = s.execute(
+                    text("SELECT email FROM subscribers WHERE email = :email"), 
+                    {"email": user_email}
+                ).fetchone()
+                
+                if existing:
+                    st.sidebar.warning("This email is already subscribed!")
+                else:
+                    s.execute(
+                        text("INSERT INTO subscribers (email) VALUES (:email)"), 
+                        {"email": user_email}
+                    )
+                    s.commit()
+                    st.sidebar.success("Successfully subscribed!")
+                    st.balloons()
         except Exception as e:
             st.sidebar.error(f"Database error: {e}")
     else:

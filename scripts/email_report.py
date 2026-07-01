@@ -1,32 +1,36 @@
 import sqlite3
 import pandas as pd
+from sqlalchemy import create_engine
 import smtplib
 import os
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
 def get_subscribers(sender_email):
-    """Fetch all emails from the database. Falls back to sender email if empty."""
-    try:
-        conn = sqlite3.connect("db/bluestock_mf.db")
-        # Check if table exists first
-        cursor = conn.cursor()
-        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='subscribers';")
-        if not cursor.fetchone():
-            print("Subscribers table does not exist yet on GitHub. Using sender email as test fallback.")
-            return [sender_email]
-            
-        df = pd.read_sql("SELECT email FROM subscribers", conn)
-        conn.close()
+    """Fetch all emails from the Supabase cloud database."""
+    db_url = os.environ.get("SUPABASE_URL")
+    
+    # SQLAlchemy requires the prefix to be postgresql://
+    if db_url and db_url.startswith("postgres://"):
+        db_url = db_url.replace("postgres://", "postgresql://", 1)
+    
+    if not db_url:
+        print("Supabase URL not found. Using test fallback.")
+        return [sender_email]
         
+    try:
+        # Connect to Supabase
+        engine = create_engine(db_url)
+        df = pd.read_sql("SELECT email FROM subscribers", engine)
         emails = df['email'].tolist()
+        
         if not emails:
-            print("Subscribers table is empty on GitHub. Using sender email as test fallback.")
+            print("Subscribers table is empty in Supabase. Using test fallback.")
             return [sender_email]
             
         return emails
     except Exception as e:
-        print(f"Error fetching subscribers: {e}. Using sender email as test fallback.")
+        print(f"Error fetching subscribers from Supabase: {e}. Using test fallback.")
         return [sender_email]
 
 def generate_html_report():
