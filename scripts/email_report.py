@@ -1,6 +1,5 @@
 import sqlite3
 import pandas as pd
-from sqlalchemy import create_engine
 import smtplib
 import os
 from email.mime.text import MIMEText
@@ -10,7 +9,6 @@ def get_subscribers(sender_email):
     """Fetch all emails from the Supabase cloud database."""
     db_url = os.environ.get("SUPABASE_URL")
     
-    # SQLAlchemy requires the prefix to be postgresql://
     if db_url and db_url.startswith("postgres://"):
         db_url = db_url.replace("postgres://", "postgresql://", 1)
     
@@ -19,7 +17,7 @@ def get_subscribers(sender_email):
         return [sender_email]
         
     try:
-        # Connect to Supabase
+        from sqlalchemy import create_engine
         engine = create_engine(db_url)
         df = pd.read_sql("SELECT email FROM subscribers", engine)
         emails = df['email'].tolist()
@@ -34,7 +32,7 @@ def get_subscribers(sender_email):
         return [sender_email]
 
 def generate_html_report():
-    """Query the database and build a stylized HTML table."""
+    """Query the database and build a premium, publication-grade HTML email."""
     try:
         conn = sqlite3.connect("db/bluestock_mf.db")
         query = """
@@ -47,45 +45,119 @@ def generate_html_report():
         df = pd.read_sql(query, conn)
         conn.close()
         
-        # Build an elegant HTML table using inline CSS styling
-        table_html = df.to_html(index=False, classes='report-table')
-        # Inject standard clean styling into the table raw string
-        table_html = table_html.replace(
-            'class="dataframe report-table"', 
-            'style="width:100%; border-collapse:collapse; font-family:Arial; margin-top:15px;"'
-        ).replace(
-            '<th>', '<th style="background-color:#2E86C1; color:white; padding:10px; border:1px solid #ddd; text-align:left;">'
-        ).replace(
-            '<td>', '<td style="padding:10px; border:1px solid #ddd; text-align:left;">'
-        )
+        # Format returns to look clean (e.g., 18.50%)
+        df['return_3yr_pct'] = df['return_3yr_pct'].apply(lambda x: f"{x:.2f}%")
+        
+        # Rename columns for presentation
+        df.columns = ['Mutual Fund Scheme', 'Asset Class', '3-Year CAGR (Return)']
+        
+        # Build stylized HTML table rows
+        table_rows = ""
+        for idx, row in df.iterrows():
+            bg_color = "#ffffff" if idx % 2 == 0 else "#f8fafc"
+            table_rows += f"""
+            <tr style="background-color: {bg_color}; border-bottom: 1px solid #e2e8f0;">
+                <td style="padding: 14px 16px; font-size: 14px; color: #1e293b; font-weight: 500; line-height: 1.4;">{row['Mutual Fund Scheme']}</td>
+                <td style="padding: 14px 16px; font-size: 14px; color: #64748b;">{row['Asset Class']}</td>
+                <td style="padding: 14px 16px; font-size: 14px; color: #16a34a; font-weight: 600; text-align: right;">{row['3-Year CAGR (Return)']}</td>
+            </tr>
+            """
     except Exception as e:
         print(f"Error generating data tables: {e}")
-        table_html = "<p>Data temporarily unavailable. Please visit the dashboard.</p>"
+        table_rows = """
+        <tr>
+            <td colspan="3" style="padding: 20px; text-align: center; color: #64748b;">Data temporarily unavailable. Please visit the live dashboard.</td>
+        </tr>
+        """
 
     html = f"""
+    <!DOCTYPE html>
     <html>
-        <body style="font-family: Arial, sans-serif; color: #333; line-height: 1.6; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 8px;">
-            <h2 style="color: #2E86C1; border-bottom: 2px solid #2E86C1; padding-bottom: 10px; margin-top: 0;">Bluestock MF Weekly Insights 📈</h2>
-            <p>Hello,</p>
-            <p>Here are the top 5 performing mutual funds for this week based on 3-Year CAGR performance:</p>
-            {table_html}
-            <br>
-            <p style="background-color: #f9f9f9; padding: 10px; border-left: 4px solid #2E86C1; font-size: 14px;">
-                <strong>Note:</strong> This is an automated dynamic report generated directly from your GitHub Actions pipeline.
-            </p>
-            <p>Log back into your live Streamlit dashboard to explore advanced interactive charts, portfolio optimizations, and deeper metrics.</p>
-            <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
-            <p style="font-size: 11px; color: #777; text-align: center;">
-                You are receiving this because you signed up via the Bluestock Dashboard subscription portal.<br>
-                To unsubscribe, simply reply to this email.
-            </p>
-        </body>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Bluestock Weekly Analytics</title>
+    </head>
+    <body style="margin: 0; padding: 0; background-color: #f1f5f9; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+        <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #f1f5f9; padding: 20px 0;">
+            <tr>
+                <td align="center">
+                    <!-- Main Container Card -->
+                    <table width="100%" max-width="600" border="0" cellspacing="0" cellpadding="0" style="max-width: 600px; width: 100%; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03); border: 1px solid #e2e8f0;">
+                        
+                        <!-- Header Banner -->
+                        <tr>
+                            <td style="background: linear-gradient(135deg, #1e3a8a 0%, #0284c7 100%); padding: 32px 24px; text-align: left;">
+                                <h1 style="margin: 0; color: #ffffff; font-size: 24px; font-weight: 700; letter-spacing: -0.5px;">Bluestock Intelligence</h1>
+                                <p style="margin: 4px 0 0 0; color: #bae6fd; font-size: 14px; font-weight: 400;">Weekly Mutual Fund Performance Briefing</p>
+                            </td>
+                        </tr>
+
+                        <!-- Body Content Section -->
+                        <tr>
+                            <td style="padding: 32px 24px;">
+                                <p style="margin: 0 0 12px 0; font-size: 16px; font-weight: 600; color: #0f172a;">Dear Investor,</p>
+                                <p style="margin: 0 0 24px 0; font-size: 15px; line-height: 1.6; color: #334155;">
+                                    Please find below your curated executive summary highlighting the top-performing mutual funds across our analytics matrix this week, ranked strictly by annualized 3-year compound growth rates (CAGR).
+                                </p>
+
+                                <!-- Performance Data Table -->
+                                <table width="100%" border="0" cellspacing="0" cellpadding="0" style="border: 1px solid #e2e8f0; border-radius: 8px; border-collapse: separate; border-spacing: 0; overflow: hidden;">
+                                    <thead>
+                                        <tr style="background-color: #f8fafc;">
+                                            <th style="padding: 12px 16px; font-size: 12px; font-weight: 600; text-transform: uppercase; tracking: 0.05em; color: #475569; text-align: left; border-bottom: 2px solid #e2e8f0;">Mutual Fund Scheme</th>
+                                            <th style="padding: 12px 16px; font-size: 12px; font-weight: 600; text-transform: uppercase; tracking: 0.05em; color: #475569; text-align: left; border-bottom: 2px solid #e2e8f0;">Asset Class</th>
+                                            <th style="padding: 12px 16px; font-size: 12px; font-weight: 600; text-transform: uppercase; tracking: 0.05em; color: #475569; text-align: right; border-bottom: 2px solid #e2e8f0;">3Y CAGR</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {table_rows}
+                                    </tbody>
+                                </table>
+
+                                <!-- CTA Section -->
+                                <table width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-top: 32px; text-align: center;">
+                                    <tr>
+                                        <td>
+                                            <a href="https://share.streamlit.io/" target="_blank" style="display: inline-block; background-color: #0284c7; color: #ffffff; font-size: 14px; font-weight: 600; text-decoration: none; padding: 12px 28px; border-radius: 6px; box-shadow: 0 2px 4px rgba(2, 132, 199, 0.2);">
+                                                Launch Full Analytics Dashboard
+                                            </a>
+                                        </td>
+                                    </tr>
+                                </table>
+
+                                <!-- Informational Info Box -->
+                                <table width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-top: 28px; background-color: #f8fafc; border-left: 4px solid #0284c7; border-radius: 4px;">
+                                    <tr>
+                                        <td style="padding: 14px 16px; font-size: 13px; line-height: 1.5; color: #475569;">
+                                            <strong>Automated Run Notice:</strong> This market summary was programmatically updated via our data orchestration layer. To track historical inflows, run portfolio optimizations, or map capital velocity charts, use the link above.
+                                        </td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+
+                        <!-- Footer Block -->
+                        <tr>
+                            <td style="background-color: #f8fafc; padding: 24px; border-top: 1px solid #e2e8f0; text-align: center;">
+                                <p style="margin: 0 0 6px 0; font-size: 12px; color: #64748b; font-weight: 500;">Bluestock MF Analytics Platform</p>
+                                <p style="margin: 0; font-size: 11px; color: #94a3b8; line-height: 1.4;">
+                                    You receive these updates because you enrolled in automated reporting via the dashboard.<br>
+                                    To alter subscription parameters or opt out, please manage your settings on the terminal.
+                                </p>
+                            </td>
+                        </tr>
+
+                    </table>
+                </td>
+            </tr>
+        </table>
+    </body>
     </html>
     """
     return html
 
 def send_emails():
-    # Safely pull credentials from the GitHub workflow environment variables
     sender_email = os.environ.get("EMAIL_USER")
     password = os.environ.get("EMAIL_PASS")
 
@@ -93,22 +165,19 @@ def send_emails():
         print("Missing email credentials environment variables. Exiting.")
         return
 
-    # Get subscriber list (or our fallback test address)
     emails = get_subscribers(sender_email)
     html_content = generate_html_report()
     
     msg = MIMEMultipart()
-    msg['Subject'] = "📈 Your Weekly Bluestock MF Performance Report"
-    msg['From'] = sender_email
+    msg['Subject'] = "📊 Weekly Market Intelligence Briefing | Bluestock Analytics"
+    msg['From'] = f"Bluestock Intelligence <{sender_email}>"
     msg.attach(MIMEText(html_content, 'html'))
 
     try:
-        # Secure SMTP SSL connection to Gmail on port 465
         with smtplib.SMTP_SSL('smtp.gmail.com', 465) as server:
             server.login(sender_email, password)
-            # Use BCC array to safely blast the emails without leaking recipient addresses
             server.sendmail(sender_email, emails, msg.as_string())
-        print(f"Successfully executed workflow! Emailed report sent out to: {emails}")
+        print(f"Workflow Complete! Professional executive report transmitted to: {emails}")
     except Exception as e:
         print(f"Failed to transmit email execution: {e}")
 
