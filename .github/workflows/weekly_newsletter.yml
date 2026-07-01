@@ -1,0 +1,30 @@
+name: Weekly Subscriber Newsletter
+
+on:
+  schedule:
+    - cron: '0 8 * * 1' # Automates every single Monday at 1:30 PM IST (08:00 UTC)
+  workflow_dispatch: # Allows you to press the manual button to test it instantly
+
+jobs:
+  send-newsletter:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12' # Matches your pipeline runner environment
+        
+    - name: Install Runtime Dependencies
+      run: |
+        pip install pandas sqlalchemy
+        
+    - name: Execute Automated Email Report Generator
+      env:
+        # Maps secure secrets into execution environment flags safely
+        EMAIL_USER: ${{ secrets.EMAIL_USER }}
+        EMAIL_PASS: ${{ secrets.EMAIL_PASS }}
+      run: python scripts/email_report.py

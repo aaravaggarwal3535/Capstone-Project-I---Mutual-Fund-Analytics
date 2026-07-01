@@ -2,6 +2,7 @@ import streamlit as st
 import sqlite3
 import pandas as pd
 import plotly.express as px
+import re
 
 # --- PAGE CONFIGURATION ---
 st.set_page_config(page_title="Bluestock MF Analytics Dashboard", page_icon="📈", layout="wide")
@@ -203,3 +204,41 @@ elif page == "4. Investor Analytics":
             st.warning(f"Could not load geography matrices. Showing default distribution. Error: {e}")
             df_geo_fallback = pd.DataFrame({'Region': ['T30', 'B30'], 'Capital_Percent': [66.6, 33.4]})
             st.plotly_chart(px.bar(df_geo_fallback, x='Region', y='Capital_Percent', color='Region'), use_container_width=True)
+
+st.sidebar.markdown("---")
+st.sidebar.subheader("📬 Subscribe to Weekly Reports")
+st.sidebar.caption("Get a weekly HTML summary of top-performing mutual funds delivered to your inbox.")
+
+# Email Input Field
+user_email = st.sidebar.text_input("Email Address", placeholder="you@example.com")
+
+if st.sidebar.button("Subscribe"):
+    # Validate email format using regex
+    if re.match(r"[^@]+@[^@]+\.[^@]+", user_email):
+        try:
+            # Connect to local SQLite DB
+            conn = sqlite3.connect("db/bluestock_mf.db")
+            cursor = conn.cursor()
+            
+            # Ensure the subscribers table exists
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS subscribers (
+                    email TEXT PRIMARY KEY,
+                    subscribed_on DATE DEFAULT CURRENT_DATE
+                )
+            """)
+            
+            # Insert the email address safely
+            cursor.execute("INSERT INTO subscribers (email) VALUES (?)", (user_email,))
+            conn.commit()
+            conn.close()
+            
+            st.sidebar.success("Successfully subscribed!")
+            st.balloons()
+            
+        except sqlite3.IntegrityError:
+            st.sidebar.warning("This email is already subscribed!")
+        except Exception as e:
+            st.sidebar.error(f"Database error: {e}")
+    else:
+        st.sidebar.error("Please enter a valid email address.")
