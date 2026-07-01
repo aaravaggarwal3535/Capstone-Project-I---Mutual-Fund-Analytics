@@ -119,7 +119,7 @@ def generate_html_report():
                                 <table width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-top: 32px; text-align: center;">
                                     <tr>
                                         <td>
-                                            <a href="https://share.streamlit.io/" target="_blank" style="display: inline-block; background-color: #0284c7; color: #ffffff; font-size: 14px; font-weight: 600; text-decoration: none; padding: 12px 28px; border-radius: 6px; box-shadow: 0 2px 4px rgba(2, 132, 199, 0.2);">
+                                            <a href="https://mutual-fund-analytics.streamlit.app/" target="_blank" style="display: inline-block; background-color: #0284c7; color: #ffffff; font-size: 14px; font-weight: 600; text-decoration: none; padding: 12px 28px; border-radius: 6px; box-shadow: 0 2px 4px rgba(2, 132, 199, 0.2);">
                                                 Launch Full Analytics Dashboard
                                             </a>
                                         </td>
@@ -169,7 +169,7 @@ def send_emails():
     html_content = generate_html_report()
     
     msg = MIMEMultipart()
-    msg['Subject'] = "📊 Weekly Market Intelligence Briefing | Bluestock Analytics"
+    msg['Subject'] = "Weekly Market Intelligence Briefing | Bluestock Analytics"
     msg['From'] = f"Bluestock Intelligence <{sender_email}>"
     msg.attach(MIMEText(html_content, 'html'))
 
