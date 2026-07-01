@@ -2,8 +2,11 @@ import streamlit as st
 import sqlite3
 import pandas as pd
 import plotly.express as px
+import plotly.graph_objects as go
 import re
 from sqlalchemy import text
+from scipy.optimize import minimize
+import numpy as np
 
 # --- PAGE CONFIGURATION ---
 st.set_page_config(page_title="Bluestock MF Analytics Dashboard", page_icon="📈", layout="wide")
@@ -23,7 +26,8 @@ page = st.sidebar.radio("Go to:", [
     "1. Industry Overview", 
     "2. Fund Performance", 
     "3. Market & Inflows", 
-    "4. Investor Analytics"
+    "4. Investor Analytics",
+    "5. Portfolio Optimization"
 ])
 
 st.sidebar.markdown("---")
@@ -205,6 +209,96 @@ elif page == "4. Investor Analytics":
             st.warning(f"Could not load geography matrices. Showing default distribution. Error: {e}")
             df_geo_fallback = pd.DataFrame({'Region': ['T30', 'B30'], 'Capital_Percent': [66.6, 33.4]})
             st.plotly_chart(px.bar(df_geo_fallback, x='Region', y='Capital_Percent', color='Region'), use_container_width=True)
+elif page == "5. Portfolio Optimization":
+    st.header("🧠 Portfolio Optimization Engine")
+    st.write("Allocate your capital to maximize returns while minimizing risk.")
+
+    # Fetch data for optimization
+    conn = sqlite3.connect("db/bluestock_mf.db")
+    query = """
+        SELECT scheme_name, return_3yr_pct, return_5yr_pct 
+        FROM fact_performance 
+        WHERE return_3yr_pct IS NOT NULL AND return_5yr_pct IS NOT NULL
+        LIMIT 10
+    """
+    df_opt = pd.read_sql(query, conn)
+    conn.close()
+
+    if not df_opt.empty:
+        funds = df_opt['scheme_name'].tolist()
+        # Simulated historical mean returns (annualized)
+        returns = df_opt['return_3yr_pct'].values / 100 
+        
+        # Simulate a covariance matrix (In a real app, calculate this from daily NAVs)
+        np.random.seed(42)
+        cov_matrix = np.random.rand(len(funds), len(funds)) * 0.05
+        cov_matrix = np.dot(cov_matrix, cov_matrix.transpose()) # Make it positive semi-definite
+
+        def get_portfolio_performance(weights, returns, cov_matrix):
+            port_return = np.sum(returns * weights)
+            port_volatility = np.sqrt(np.dot(weights.T, np.dot(cov_matrix, weights)))
+            return port_return, port_volatility
+
+        def negative_sharpe(weights, returns, cov_matrix, risk_free_rate=0.07):
+            p_ret, p_vol = get_portfolio_performance(weights, returns, cov_matrix)
+            return -(p_ret - risk_free_rate) / p_vol
+
+        # Constraints and Bounds
+        constraints = ({'type': 'eq', 'fun': lambda x: np.sum(x) - 1}) # Weights sum to 1
+        bounds = tuple((0, 1) for _ in range(len(funds))) # No shorting
+        initial_weights = len(funds) * [1. / len(funds)]
+
+        # Run the Optimizer
+        opt_results = minimize(negative_sharpe, initial_weights, args=(returns, cov_matrix), 
+                            method='SLSQP', bounds=bounds, constraints=constraints)
+
+        if opt_results.success:
+            st.success("Optimization Complete!")
+            
+            # Display optimal weights
+            optimal_weights = np.round(opt_results.x, 3) * 100
+            result_df = pd.DataFrame({'Mutual Fund': funds, 'Optimal Allocation (%)': optimal_weights})
+            result_df = result_df[result_df['Optimal Allocation (%)'] > 0].sort_values(by='Optimal Allocation (%)', ascending=False)
+            
+            st.table(result_df)
+
+    import plotly.graph_objects as go
+
+    st.header("🎲 Monte Carlo Wealth Forecaster")
+    st.write("Simulate 1,000 possible future market paths over the next 10 years.")
+
+    col1, col2, col3 = st.columns(3)
+    initial_investment = col1.number_input("Initial Investment (₹)", value=100000)
+    years = col2.slider("Years to Forecast", 1, 20, 10)
+    simulations = 1000
+
+    # Using a standard 12% expected return and 15% volatility for Indian Equity MFs
+    mu = 0.12 
+    vol = 0.15 
+
+    if st.button("Run Simulation"):
+        with st.spinner("Crunching tensor arrays..."):
+            # Vectorized simulation matrix: shape (years, simulations)
+            # Using Geometric Brownian Motion formulation
+            daily_returns = np.random.normal((mu - 0.5 * vol**2), vol, (years, simulations))
+            price_paths = initial_investment * np.exp(np.cumsum(daily_returns, axis=0))
+            
+            # Create a Plotly Chart mapping a subset of paths to keep the browser responsive
+            fig = go.Figure()
+            for i in range(100): # Plot first 100 paths for visual clarity
+                fig.add_trace(go.Scatter(y=price_paths[:, i], mode='lines', line=dict(color='rgba(2, 132, 199, 0.1)'), showlegend=False))
+            
+            fig.update_layout(title="Simulated Portfolio Value Over Time",
+                            xaxis_title="Years",
+                            yaxis_title="Portfolio Value (₹)",
+                            template="plotly_white")
+            st.plotly_chart(fig, use_container_width=True)
+
+            # Calculate Percentiles
+            final_values = price_paths[-1, :]
+            st.info(f"**Expected Value (50th Percentile):** ₹{np.percentile(final_values, 50):,.2f}")
+            st.warning(f"**Bear Market (10th Percentile):** ₹{np.percentile(final_values, 10):,.2f}")
+            st.success(f"**Bull Market (90th Percentile):** ₹{np.percentile(final_values, 90):,.2f}")
 
 st.sidebar.markdown("---")
 st.sidebar.subheader("📬 Subscribe to Weekly Reports")
