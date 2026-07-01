@@ -27,6 +27,14 @@ This Capstone project solves this by building an automated, end-to-end data pipe
 
 ---
 
+## 🚀 Core Features & Architecture
+
+* **Automated Data Pipeline:** Deployed a scheduled ETL script via GitHub Actions that auto-fetches daily NAV data from `mfapi.in` every weekday at 8:00 PM.
+* **Interactive Cloud Dashboard:** Built a dynamic Streamlit web application as a responsive, cloud-hosted alternative to Power BI for seamless data visualization.
+* **Monte Carlo Forecasting Engine:** Implemented a stochastic simulation module to project mutual fund NAV growth over a 5-year horizon, complete with probabilistic uncertainty bands.
+* **Portfolio Optimization (Modern Portfolio Theory):** Engineered a Markowitz Efficient Frontier optimization module using SciPy to calculate the optimal capital allocation across selected funds to maximize the Sharpe ratio.
+* **Automated Newsletter System:** Created a cloud-scheduled email report generator that queries the live subscriber database and broadcasts a stylized HTML weekly performance summary directly to users' inboxes.
+
 ## 📂 Repository Structure
 ```text
 C:\internships\
